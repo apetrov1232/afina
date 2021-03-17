@@ -195,3 +195,69 @@ TEST(StorageTest, MaxTest) {
         EXPECT_FALSE(storage.Get(key, res));
     }
 }
+
+TEST(StorageTest, PetrovTest1) {
+    const size_t length = 200;
+    SimpleLRU storage(length);
+
+    auto key = pad_space("Key1", length/2);
+    auto val1 = pad_space("Val1", length/2);
+    EXPECT_TRUE(storage.Put(key, val1));
+    
+    key = pad_space("Key1", length/2);
+    auto val2 = pad_space("Val2", length/2 + 1);
+    EXPECT_FALSE(storage.Put(key, val2));
+
+    std::string res;
+    EXPECT_TRUE(storage.Get(key, res));
+
+    EXPECT_TRUE(res==val1);
+}
+
+TEST(StorageTest, PetrovTest2) {
+    const size_t length = 200;
+    SimpleLRU storage(length);
+
+    auto key1 = pad_space("Key1", length/4);
+    auto val1 = pad_space("Val1", length/4);
+    EXPECT_TRUE(storage.Put(key1, val1));
+
+    auto key2 = pad_space("Key2", length/4);
+    auto val = pad_space("Val2", length/4);
+    EXPECT_TRUE(storage.Put(key2, val));
+    
+    auto key = pad_space("Key1", length/4);
+    val = pad_space("Val3", length/4 + 1);
+    EXPECT_TRUE(storage.Set(key, val));
+
+    std::string res;
+    EXPECT_FALSE(storage.Get(key2, res));
+
+    EXPECT_TRUE(storage.Get(key1, res));
+
+    EXPECT_TRUE(res==val);
+}
+
+TEST(StorageTest, PetrovTest3) {
+    const size_t length = 200;
+    SimpleLRU storage(length);
+
+    auto key1 = pad_space("Key1", length/4);
+    auto val1 = pad_space("Val1", length/4);
+    EXPECT_TRUE(storage.Put(key1, val1));
+
+    auto key2 = pad_space("Key2", length/4);
+    auto val = pad_space("Val2", length/4);
+    EXPECT_TRUE(storage.Put(key2, val));
+
+    std::string res;
+    EXPECT_TRUE(storage.Get(key1, res));
+
+    auto key = pad_space("Key3", length/4);
+    val = pad_space("Val3", length/4);
+    EXPECT_TRUE(storage.Put(key, val));
+
+    EXPECT_FALSE(storage.Get(key2, res));
+
+    EXPECT_TRUE(storage.Get(key1, res));
+}
