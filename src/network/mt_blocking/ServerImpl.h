@@ -3,6 +3,9 @@
 
 #include <atomic>
 #include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <set>
 
 #include <afina/network/Server.h>
 
@@ -36,6 +39,8 @@ protected:
     /**
      * Method is running in the connection acceptor thread
      */
+    void Work(int client_socket);
+
     void OnRun();
 
 private:
@@ -52,6 +57,14 @@ private:
 
     // Thread to run network on
     std::thread _thread;
+
+    std::mutex server_mutex;
+
+    std::set<int> connections;
+
+    size_t limits;
+
+    std::condition_variable cv;
 };
 
 } // namespace MTblocking
