@@ -4,6 +4,7 @@
 #include <map>
 #include <mutex>
 #include <string>
+//#include <chrono>
 
 #include "SimpleLRU.h"
 
@@ -52,7 +53,8 @@ public:
     bool Get(const std::string &key, std::string &value) override {
         // TODO: sinchronization
         std::lock_guard<std::mutex> lk(storage_mutex);
-        return SimpleLRU::Get(key, value);
+        //std::this_thread::sleep_for(std::chrono::seconds(2));
+        return SimpleLRU::Get(key, value);;
     }
 
 private:
