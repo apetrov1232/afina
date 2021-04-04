@@ -28,7 +28,7 @@ namespace Network {
 namespace MTblocking {
 
 // See Server.h
-ServerImpl::ServerImpl(std::shared_ptr<Afina::Storage> ps, std::shared_ptr<Logging::Service> pl) : Server(ps, pl) {}
+ServerImpl::ServerImpl(std::shared_ptr<Afina::Storage> ps, std::shared_ptr<Logging::Service> pl) : Server(ps, pl), executor() {}
 
 // See Server.h
 ServerImpl::~ServerImpl() {}
@@ -86,16 +86,18 @@ void ServerImpl::Stop() {
         shutdown(*it, SHUT_RD);
     }
     shutdown(_server_socket, SHUT_RDWR);
+    executor.Stop(false);
 }
 
 // See Server.h
 void ServerImpl::Join() {
-    assert(_thread.joinable());
-    _thread.join();
+    //assert(_thread.joinable());
+    //_thread.join();
     std::unique_lock<std::mutex> lk(server_mutex);
     while (!connections.empty())
         cv.wait(lk);
     close(_server_socket);
+    executor.Stop(false);
 }
 
 // See Server.h
@@ -136,7 +138,8 @@ void ServerImpl::OnRun() {
             std::lock_guard<std::mutex> lk(server_mutex);
             if ((connections.size() < limits) && (running)){
                 connections.insert(client_socket);
-                std::thread(&ServerImpl::Work, this, client_socket).detach();
+                //std::thread(&ServerImpl::Work, this, client_socket).detach();
+                executor.Execute(&ServerImpl::Work, this, client_socket);
             }
             else
                 close(client_socket);
